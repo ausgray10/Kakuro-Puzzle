@@ -1,13 +1,12 @@
 package tiles;
 
 import java.awt.Color;
+import game.*;
+import game.Handlers.*;
 
 import javax.swing.*;
 
-import main.OptionsManager;
-import pages.Options;
-
-public class BlankTile extends JPanel implements ITile {
+public class BlankTile extends JPanel implements ITile, ColorChangeListener   {
 	
 	private static final long serialVersionUID = 1L;
 	private int xPos;
@@ -17,9 +16,13 @@ public class BlankTile extends JPanel implements ITile {
 		super();
 		this.xPos = x;
 		this.yPos = y;
+		OptionsManager.onMainColorChange.add(this);
+		this.setBackground(OptionsManager.getColor());
 		
-		this.setBackground(OptionsManager.mainColor);
-		
+	}
+	
+	public void destroy() {
+		OptionsManager.onMainColorChange.remove(this);
 	}
 	
 	public int getXPos() {
@@ -32,6 +35,11 @@ public class BlankTile extends JPanel implements ITile {
 	@Override
 	public String saveString() {
 		return "e0000";
+	}
+
+	@Override
+	public void onColorChange(Color color) {
+		this.setBackground(color);
 	}
 	
 }

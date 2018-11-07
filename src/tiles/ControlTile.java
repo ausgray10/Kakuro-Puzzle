@@ -10,13 +10,10 @@ import java.util.ArrayList;
 
 import javax.swing.*;
 
-import main.Main;
-import main.OptionsManager;
-import pages.Menu;
-import pages.Options;
+import game.Handlers.*;
 import tiles.InputTile.Result;
 
-public class ControlTile extends JComponent implements ITile {
+public class ControlTile extends JComponent implements ITile, ColorChangeListener {
 
 	private static final long serialVersionUID = 1L;
 	private int xPos;
@@ -35,6 +32,11 @@ public class ControlTile extends JComponent implements ITile {
 		this.colVal = colVal;
 		this.colTiles = new ArrayList<InputTile>();
 		this.rowTiles = new ArrayList<InputTile>();
+		OptionsManager.onMainColorChange.add(this);
+	}
+	
+	public void destroy() {
+		OptionsManager.onMainColorChange.remove(this);
 	}
 	
 	public int getXPos() {
@@ -43,6 +45,11 @@ public class ControlTile extends JComponent implements ITile {
 	}
 	public int getYPos() {
 		return this.yPos;
+	}
+	
+	@Override
+	public void onColorChange(Color color) {
+		this.repaint();
 	}
 	
 	public int getRowVal() {
@@ -158,10 +165,10 @@ public class ControlTile extends JComponent implements ITile {
 		this.setBackground(Color.WHITE);
 		Graphics2D g = (Graphics2D)graph;
 		
-		g.setColor(OptionsManager.mainColor);
+		g.setColor(OptionsManager.getColor());
 		g.fillRect(0, 0, this.getWidth(), this.getHeight());
 		
-		g.setColor(ContrastColor(OptionsManager.mainColor));
+		g.setColor(ContrastColor(OptionsManager.getColor()));
 		g.setStroke(new BasicStroke(1));
 		g.drawLine(0, 0, this.getWidth(), this.getHeight());
 		

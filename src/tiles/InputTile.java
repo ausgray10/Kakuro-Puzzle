@@ -3,25 +3,21 @@ package tiles;
 import java.awt.Color;
 
 import java.awt.Font;
-import java.awt.PopupMenu;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 
 import javax.swing.*;
-import javax.swing.event.PopupMenuEvent;
-import javax.swing.event.PopupMenuListener;
 
-import main.Main;
-import main.SoundManager;
-import pages.*;
+import boards.Board;
+import game.Handlers.*;
+import game.Menu;
 
 public class InputTile extends JButton implements ITile {
 	
@@ -218,7 +214,7 @@ public class InputTile extends JButton implements ITile {
 		this.updateText();
 		this.updateTile();
 		SoundManager.playSound(SoundManager.SLIP);
-		((Board)Main.GetCurrentPage()).CheckForGameOver();
+		Menu.getBoard().checkForGameOver();
 	}
 	
 	private void setMenuOptions() {
@@ -254,5 +250,9 @@ public class InputTile extends JButton implements ITile {
 	public String saveString() {
 		return "w00" + String.format("%02d", value);
 	}
-	
+
+	@Override
+	public void destroy() {
+		
+	}
 }

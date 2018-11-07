@@ -1,0 +1,89 @@
+package boards;
+
+import javax.swing.JLabel;
+
+import game.Handlers;
+import game.Menu;
+import game.Puzzle;
+import game.Handlers.*;
+
+public class TimedBoard extends Board {
+
+	private int maxTimer;
+	protected int timer;
+	private java.util.Timer currentTimer;
+	
+	protected JLabel countdownLabel = new JLabel();
+	
+	public TimedBoard(Puzzle puzzle) {
+		super(puzzle);
+		maxTimer = timer = (int)Math.pow(inputs.size(),1.75f) * 1000;
+		this.resetPuzzle();
+		Menu.addMenuItem(countdownLabel);
+		
+	}
+	
+	public void destroy() {
+		super.destroy();
+		Menu.removeMenuItem(countdownLabel);
+		currentTimer.cancel();
+	}
+	
+	protected void onGameOver() {
+		super.onGameOver();
+		currentTimer.cancel();
+	}
+	
+	protected void callTimer() {
+		if(timer <= 0) {
+			for(int i = 0; i < super.inputs.size(); i++) {
+				inputs.get(i).setEnabled(false);
+			}
+			System.out.println("Game Over!");
+			SoundManager.playSound(SoundManager.EXPLOSION);
+			currentTimer = null;
+			return;
+		}
+		int timeInterval = 1000;
+		if(timer < 15000 && timer > 5000) {
+			timeInterval  = 500;
+		}
+		if(timer < 5000) {
+			timeInterval  = 250;
+		}
+		final int lastTime = timeInterval;
+		currentTimer = new java.util.Timer();
+		currentTimer.schedule( 
+		        new java.util.TimerTask() {
+		            public void run() {
+		            	onRunInterval(lastTime);
+		            }
+		        }, 
+		        lastTime
+		);
+	}
+	
+	protected void onRunInterval(int lastTime) {
+    	SoundManager.playSound(SoundManager.BEEP);
+    	timer -= lastTime;
+    	countdownLabel.setText(getTime());
+    	callTimer();
+	}
+	
+	protected String getTime() {
+		long second = (timer / 1000) % 60;
+		long minute = (timer / (1000 * 60)) % 60;
+		long hour = (timer / (1000 * 60 * 60)) % 24;
+		return String.format("%02d:%02d:%02d", hour, minute, second);
+	}
+	
+	
+	public void resetPuzzle() {
+		super.resetPuzzle();
+		this.timer = maxTimer;
+		if(currentTimer == null) {
+			callTimer();
+		}
+	}
+
+}
