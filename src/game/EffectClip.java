@@ -3,26 +3,20 @@ package game;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
 
-import game.Handlers.*;
+import game.Handlers.OptionsManager;
 import listeners.VolumeChangeListener;
 
-/**
- * Background Clip
- * 
- * @author Austin Gray
- *
- */
-public class BackgroundClip implements VolumeChangeListener {
+public class EffectClip implements VolumeChangeListener {
 	private Clip clip;
-	private boolean continueLoop = true;
 
 	/**
-	 * Creats a new Background Clip
+	 * Creats a new Effect Clip
 	 * 
 	 * @param clip current clip
 	 */
-	public BackgroundClip(Clip clip) {
+	public EffectClip(Clip clip) {
 		this.clip = clip;
+		volumeChangeCreate();
 	}
 
 	/**
@@ -38,8 +32,8 @@ public class BackgroundClip implements VolumeChangeListener {
 	 * Checks if clip is running
 	 * @return trus if running
 	 */
-	public boolean isLooping() {
-		return continueLoop;
+	public boolean isRunning() {
+		return clip.isRunning();
 	}
 
 	/**
@@ -47,7 +41,6 @@ public class BackgroundClip implements VolumeChangeListener {
 	 */
 	public void stop() {
 		clip.stop();
-		continueLoop = false;
 		volumechangeDestroy();
 	}
 
@@ -56,7 +49,6 @@ public class BackgroundClip implements VolumeChangeListener {
 	 */
 	public void start() {
 		volumeChangeCreate();
-		continueLoop = true;
 		clip.start();
 	}
 
@@ -78,11 +70,11 @@ public class BackgroundClip implements VolumeChangeListener {
 
 	@Override
 	public void volumeChangeCreate() {
-		Handlers.OptionsManager.backgroundChangeArray.add(this);
+		Handlers.OptionsManager.effectChangeArray.add(this);
 	}
 
 	@Override
 	public void volumechangeDestroy() {
-		Handlers.OptionsManager.backgroundChangeArray.remove(this);
+		Handlers.OptionsManager.effectChangeArray.remove(this);
 	}
 }

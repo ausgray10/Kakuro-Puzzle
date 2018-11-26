@@ -16,16 +16,34 @@ import javax.sound.sampled.FloatControl;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import listeners.*;
 import tiles.BlankTile;
 import tiles.ControlTile;
 import tiles.ITile;
 import tiles.InputTile;
 
+/**
+ * Handlers that are used for Game
+ * 
+ * @author Austin Gray
+ *
+ */
 public class Handlers {
 
-	public static class FileManager{
+	/**
+	 * File Manager System
+	 * 
+	 * @author Austin Gray
+	 *
+	 */
+	public static class FileManager {
+		/**
+		 * Opens File Chooser
+		 * 
+		 * @return Puzzle for game
+		 */
 		public static Puzzle OpenFile() {
-			final JFileChooser fc = new JFileChooser(System.getProperty("user.dir") + "/Puzzles");
+			final JFileChooser fc = new JFileChooser("Resources/Puzzles");
 			FileNameExtensionFilter filter = new FileNameExtensionFilter("PUZZLE FILES, puzzle", "puzzle");
 			fc.setFileFilter(filter);
 			int returnVal = fc.showOpenDialog(null);
@@ -45,15 +63,15 @@ public class Handlers {
 							lines.add(line.split(","));
 						}
 						ITile[][] tiles = new ITile[lines.size()][lines.get(0).length];
-						for(int y = 0; y < lines.size(); y++) {
-							for(int x = 0; x < lines.get(y).length; x++) {
+						for (int y = 0; y < lines.size(); y++) {
+							for (int x = 0; x < lines.get(y).length; x++) {
 								String value = lines.get(y)[x].trim();
 								char id = value.charAt(0);
 								int col = Integer.parseInt(value.substring(1, 3));
 								int row = Integer.parseInt(value.substring(3, 5));
-								switch(id) {
+								switch (id) {
 								case 'b':
-									tiles[y][x] = new ControlTile(x,y, col, row);
+									tiles[y][x] = new ControlTile(x, y, col, row);
 									break;
 								case 'w':
 									tiles[y][x] = new InputTile(x, y, col + row);
@@ -73,13 +91,18 @@ public class Handlers {
 			return null;
 		}
 
+		/**
+		 * Saves puzzle using File Chooser
+		 * 
+		 * @param puzzle puzzle to save
+		 */
 		public static void SaveFile(Puzzle puzzle) {
-			final JFileChooser fc = new JFileChooser(System.getProperty("user.dir") + "/Puzzles");
+			final JFileChooser fc = new JFileChooser("Resources/Puzzles");
 			fc.setSelectedFile(new File(puzzle.getName()));
 			FileNameExtensionFilter filter = new FileNameExtensionFilter("PUZZLE FILES, puzzle", "puzzle");
 			fc.setFileFilter(filter);
 			int returnVal = fc.showSaveDialog(null);
-			
+
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = fc.getSelectedFile();
 				try {
@@ -92,38 +115,65 @@ public class Handlers {
 			}
 		}
 	}
-	
+
+	/**
+	 * Options Manager System
+	 * 
+	 * @author Austin Gray
+	 *
+	 */
 	public static class OptionsManager {
+
+		public static ArrayList<ColorChangeListener> colorChangeArray = new ArrayList<ColorChangeListener>();
+		public static ArrayList<VolumeChangeListener> effectChangeArray = new ArrayList<VolumeChangeListener>();
+		public static ArrayList<VolumeChangeListener> backgroundChangeArray = new ArrayList<VolumeChangeListener>();
 		
-		public static ArrayList<ColorChangeListener> onMainColorChange = new ArrayList<ColorChangeListener>();
-		public static ArrayList<VolumeChangeListener> onVolumeChange = new ArrayList<VolumeChangeListener>();
 		
-		private static Color mainColor = Color.BLUE;
-		private static int volume = 100;
-		
+		public static Color currentColor = Color.BLUE;
+		public static int effectVolume = 100;
+		public static int backgroundVolume = 100;
+
+		/**
+		 * Sets current color for all listeners
+		 * 
+		 * @param color new Color
+		 */
 		public static void setColor(Color color) {
-			mainColor = color;
-			for(ColorChangeListener listener : onMainColorChange) {
+			currentColor = color;
+			for (ColorChangeListener listener : colorChangeArray) {
 				listener.onColorChange(color);
 			}
 		}
-		
-		public static Color getColor() {
-			return mainColor;
-		}
-		
-		public static void setVolume(int value) {
-			volume = value;
-			for(VolumeChangeListener listener : onVolumeChange) {
-				listener.onVolumeChange(volume);
+
+		/**
+		 * Sets current background volume for all listeners
+		 * 
+		 * @param value new volume
+		 */
+		public static void setBackgroundVolume(int value) {
+			backgroundVolume = value;
+			for (VolumeChangeListener listener : backgroundChangeArray) {
+				listener.onVolumeChange(value);
 			}
 		}
-		public static int getVolume() {
-			return volume;
+		
+		/**
+		 * Sets current volume for all listeners
+		 * 
+		 * @param value new volume
+		 */
+		public static void setEffectVolume(int value) {
+			effectVolume = value;
+			for (VolumeChangeListener listener : effectChangeArray) {
+				listener.onVolumeChange(value);
+			}
 		}
 
+		/**
+		 * Load Game.ini file
+		 */
 		public static void Load() {
-			File file = new File(System.getProperty("user.dir") + "/Game.ini");
+			File file = new File("Resources/Game.ini");
 			Scanner scanner = null;
 			try {
 				scanner = new Scanner(new FileReader(file));
@@ -136,88 +186,111 @@ public class Handlers {
 					switch (split[0].trim()) {
 					case "mainColor":
 						String[] rgb = split[1].split(",");
-						mainColor = new Color(Integer.parseInt(rgb[0].trim()),Integer.parseInt(rgb[1].trim()),Integer.parseInt(rgb[2].trim()));
+						currentColor = new Color(Integer.parseInt(rgb[0].trim()), Integer.parseInt(rgb[1].trim()),
+								Integer.parseInt(rgb[2].trim()));
 						break;
-					case "volume":
-						volume = Integer.parseInt(split[1].trim());
+					case "effectVolume":
+						effectVolume = Integer.parseInt(split[1].trim());
+						break;
+					case "backgroundVolume":
+						backgroundVolume = Integer.parseInt(split[1].trim());
 						break;
 					}
 				}
 			}
 		}
 
+		/**
+		 * Save Game.ini file
+		 */
 		public static void Save() {
-			File file = new File(System.getProperty("user.dir") + "/Game.ini");
+			File file = new File("Resources/Game.ini");
 			try {
 				FileWriter writer = new FileWriter(file);
-			    writer.write("mainColor = " + mainColor.getRed() + ", " + mainColor.getGreen() + ", " + mainColor.getBlue());
-			    writer.write(System.getProperty("line.separator"));
-			    writer.write("volume = " + volume);
-			    
-			    writer.close();
+				writer.write(
+						"mainColor = " + currentColor.getRed() + ", " + currentColor.getGreen() + ", " + currentColor.getBlue());
+				writer.write(System.getProperty("line.separator"));
+				writer.write("effectVolume = " + effectVolume);
+				writer.write(System.getProperty("line.separator"));
+				writer.write("backgroundVolume = " + backgroundVolume);
+
+				writer.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 	}
-	
-	public interface ColorChangeListener{
-		abstract void onColorChange(Color color);
-	}
-	public interface VolumeChangeListener{
-		abstract void onVolumeChange(int value);
-	}
-	
+
+	/**
+	 * Sound Manager System
+	 * 
+	 * @author Austin Gray
+	 *
+	 */
 	public static class SoundManager {
-		
+
 		public static String BEEP = "beep.wav";
 		public static String PARTYHORN = "partyhorn.wav";
 		public static String SLIP = "slip.wav";
 		public static String EXPLOSION = "bomb.wav";
 		public static String JOURNEY = "Long Journey.wav";
-		
+
 		private static BackgroundClip background;
-		
+
+		/**
+		 * Play Sound in game
+		 * 
+		 * @param name file name in Resources/Sounds/
+		 */
 		public static synchronized void playSound(final String name) {
-			  new Thread(new Runnable() {
-			    public void run() {
-			      try {
-			        Clip clip = AudioSystem.getClip();
-			        AudioInputStream inputStream =AudioSystem.getAudioInputStream(new File(System.getProperty("user.dir") + "/Sounds/" + name));
-			        clip.open(inputStream);
-			        FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-			        float dB = (float) (Math.log(OptionsManager.volume / 100f) / Math.log(10.0) * 20.0);
-			        gainControl.setValue(dB);
-			        
-			        clip.start(); 
-			      } catch (Exception e) {
-			        System.err.println(e);
-			      }
-			    }
-			  }).start();
-			}
-		
-		public static synchronized void playBackgroundMusic(final String name) {
-			  new Thread(new Runnable() {
-				    public void run() {
-				      try {
-				    	  Clip clip = AudioSystem.getClip();
-				    	  background = new BackgroundClip(clip);
-				        AudioInputStream inputStream =AudioSystem.getAudioInputStream(new File(System.getProperty("user.dir") + "/Sounds/" + name));
-				        background.getClip().open(inputStream);
-				        background.getClip().loop(0);
-				        background.setVolume(OptionsManager.getVolume());
-				        background.start();
-				      } catch (Exception e) {
-				        System.err.println(e);
-				      }
-				    }
-				  }).start();
+			new Thread(new Runnable() {
+				public void run() {
+					try {
+						EffectClip effect = new EffectClip(AudioSystem.getClip());
+						AudioInputStream inputStream = AudioSystem
+								.getAudioInputStream(new File("Resources/Sounds/" + name));
+						effect.getClip().open(inputStream);
+						effect.setVolume(OptionsManager.effectVolume);
+						effect.start();
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}).start();
 		}
-		
+
+		/**
+		 * Play backgound music in game
+		 * 
+		 * @param name file name in Resources/Sounds/
+		 */
+		public static synchronized void playBackgroundMusic(final String name) {
+			new Thread(new Runnable() {
+				public void run() {
+					try {
+						background = new BackgroundClip(AudioSystem.getClip());
+						AudioInputStream inputStream = AudioSystem
+								.getAudioInputStream(new File("Resources/Sounds/" + name));
+						background.getClip().open(inputStream);
+						background.getClip().loop(Clip.LOOP_CONTINUOUSLY);
+						background.setVolume(OptionsManager.backgroundVolume);
+						background.start();
+						while(background.isLooping()) {
+							Thread.sleep(1000);
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}).start();
+		}
+
+		/**
+		 * Stop playing background music
+		 */
 		public static void stopBackgroundMusic() {
 			background.stop();
 		}
 	}
-	
+
 }

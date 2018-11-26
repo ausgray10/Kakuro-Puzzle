@@ -8,7 +8,11 @@ import game.Handlers;
 import game.Puzzle;
 import game.Handlers.*;
 import tiles.*;
-
+/**
+ * Main Game Board
+ * @author Austin Gray
+ *
+ */
 public class Board extends JPanel {
 	
 	protected Puzzle puzzle;
@@ -17,6 +21,10 @@ public class Board extends JPanel {
 	
 	private GridLayout gameLayout;
 
+	/**
+	 * Creats a new Board
+	 * @param puzzle puzzle to use for board
+	 */
 	public Board(Puzzle puzzle) {
 		this.puzzle = puzzle;
 		gameLayout = new GridLayout(puzzle.getRows(), puzzle.getCols());
@@ -47,13 +55,17 @@ public class Board extends JPanel {
 			}
 		}
 	}
-	
+	/**
+	 * Update the Puzzle
+	 */
 	public void updatePuzzle() {
 		for(int i = 0; i < controls.size(); i++) {
 			controls.get(i).updateTile();
 		}
 	}
-	
+	/**
+	 * Reset the Puzzle
+	 */
 	public void resetPuzzle() {
 		for(int i = 0; i < inputs.size(); i++) {
 			inputs.get(i).resetTile();
@@ -61,10 +73,21 @@ public class Board extends JPanel {
 		}
 	}
 	
+	public void lockBoard() {
+		for(int i = 0; i < inputs.size(); i++) {
+			inputs.get(i).setEnabled(false);
+		}
+	}
+	
+	/**
+	 * Save Puzzle to text file
+	 */
 	public void savePuzzle() {
 		FileManager.SaveFile(puzzle);
 	}
-	
+	/**
+	 * Flips the puzzle
+	 */
 	public void flipPuzzle() {
 		puzzle.flip();
 		this.removeAll();
@@ -77,7 +100,9 @@ public class Board extends JPanel {
 		gameLayout.setRows(puzzle.getRows());
 		this.validate();
 	}
-	
+	/**
+	 * Check if Board has game over
+	 */
 	public void checkForGameOver() {
 		
 		for(int i = 0; i < controls.size(); i++) {
@@ -85,18 +110,20 @@ public class Board extends JPanel {
 				return;
 			}
 		}
-		
+		onGameOver();
+	}
+	/**
+	 * Called on GameOver event
+	 */
+	protected void onGameOver() {
 		for(int i = 0; i < inputs.size(); i++) {
 			inputs.get(i).setEnabled(false);
 		}
-		
-		onGameOver();
-	}
-	
-	protected void onGameOver() {
 		SoundManager.playSound(SoundManager.PARTYHORN);
 	}
-	
+	/**
+	 * Cleans up pointers on the Board
+	 */
 	public void destroy() {
 		for(int y = 0; y < puzzle.getRows(); y++) {
 			for(int x = 0; x < puzzle.getCols(); x++) {

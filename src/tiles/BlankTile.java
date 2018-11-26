@@ -3,31 +3,46 @@ package tiles;
 import java.awt.Color;
 import game.*;
 import game.Handlers.*;
+import listeners.ColorChangeListener;
 
 import javax.swing.*;
 
-public class BlankTile extends JPanel implements ITile, ColorChangeListener   {
-	
-	private static final long serialVersionUID = 1L;
+/**
+ * Tile with no information
+ * 
+ * @author Austin Gray
+ *
+ */
+public class BlankTile extends JPanel implements ITile, ColorChangeListener {
+
 	private int xPos;
 	private int yPos;
-	
+
+	/**
+	 * Creats a blank tile
+	 * 
+	 * @param x x position of tile
+	 * @param y y position of tile
+	 */
 	public BlankTile(int x, int y) {
 		super();
 		this.xPos = x;
 		this.yPos = y;
-		OptionsManager.onMainColorChange.add(this);
-		this.setBackground(OptionsManager.getColor());
-		
+		this.setBackground(OptionsManager.currentColor);
+		colorChangeCreate();
 	}
-	
+
+	@Override
 	public void destroy() {
-		OptionsManager.onMainColorChange.remove(this);
+		colorChangeDestroy();
 	}
-	
+
+	@Override
 	public int getXPos() {
 		return this.xPos;
 	}
+
+	@Override
 	public int getYPos() {
 		return this.yPos;
 	}
@@ -41,5 +56,15 @@ public class BlankTile extends JPanel implements ITile, ColorChangeListener   {
 	public void onColorChange(Color color) {
 		this.setBackground(color);
 	}
-	
+
+	@Override
+	public void colorChangeCreate() {
+		Handlers.OptionsManager.colorChangeArray.add(this);
+	}
+
+	@Override
+	public void colorChangeDestroy() {
+		Handlers.OptionsManager.colorChangeArray.remove(this);
+	}
+
 }

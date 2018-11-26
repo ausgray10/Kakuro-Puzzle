@@ -1,10 +1,12 @@
 package game;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -17,29 +19,51 @@ import boards.CruelBoard;
 import boards.TimedBoard;
 import game.Handlers.*;
 
+/**
+ * Main Menu of Game
+ * 
+ * @author Austin Gray
+ *
+ */
 public class Menu extends JFrame{
 	private static Menu menu;
 	
 	private Board current = null;
 	private JMenuBar menuBar;
 	
+	/**
+	 * Creats the Menu
+	 * @param menuBar menu bar
+	 */
 	public Menu(JMenuBar menuBar) {
 		this.menuBar = menuBar;
 		setTitle("Kakuro Puzzle");
 		setSize(800, 800);
+		setLocationRelativeTo(null);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setJMenuBar(menuBar);
 		setVisible(true);
 	}
 	
+	/**
+	 * addMenuItem to menu
+	 * @param c component to add
+	 */
 	public static void addMenuItem(JComponent c) {
 		menu.menuBar.add(c);
 	}
+	/**
+	 * removeMenuItem from menu
+	 * @param c component to remove
+	 */
 	public static void removeMenuItem(JComponent c) {
 		menu.menuBar.remove(c);
 		menu.menuBar.repaint();
 	}
-	
+	/**
+	 * Set current board for menu
+	 * @param board current board
+	 */
 	public static void setBoard(Board board) {
 		if(menu.current != null)
 			menu.current.destroy();
@@ -49,12 +73,15 @@ public class Menu extends JFrame{
 		menu.validate();
 	}
 	
+	/**
+	 * Gets current board
+	 * @return Board Object
+	 */
 	public static Board getBoard() {
 		return menu.current;
 	}
 	
 	//STATIC DATA
-	
 	public static void main(String[] args) {
 		
 		OptionsManager.Load();
@@ -126,9 +153,18 @@ public class Menu extends JFrame{
 				}
 			}
 		});
+		JMenuItem timedMode_stop = new JMenuItem("Stop");
+		timedMode_stop.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if(getBoard() != null && getBoard().getClass() == TimedBoard.class) {
+					getBoard().lockBoard();
+				}
+			}
+		});
 		
 		menuTimedMode.add(timedMode_load);
 		menuTimedMode.add(timedMode_reset);
+		menuTimedMode.add(timedMode_stop);
 		//Menu TimedMode End
 		//Menu CruelMode
 		JMenu menuCruelMode = new JMenu("CruelMode");
@@ -148,9 +184,18 @@ public class Menu extends JFrame{
 				}
 			}
 		});
+		JMenuItem cruelMode_stop = new JMenuItem("Stop");
+		cruelMode_stop.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				if(getBoard() != null && getBoard().getClass() == CruelBoard.class) {
+					getBoard().lockBoard();
+				}
+			}
+		});
 		
 		menuCruelMode.add(cruelMode_load);
 		menuCruelMode.add(cruelMode_reset);
+		menuCruelMode.add(cruelMode_stop);
 		//Menu CruelMode End
 		
 		//Menu Settings
@@ -161,7 +206,7 @@ public class Menu extends JFrame{
 		menuSettings_theme.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JPanel popup = new JPanel();
-				Color startingColor = OptionsManager.getColor();
+				Color startingColor = OptionsManager.currentColor;
 				JColorChooser chooser = new JColorChooser(startingColor);
 				chooser.getSelectionModel().addChangeListener(new ChangeListener() {
 					public void stateChanged(ChangeEvent arg0) {
@@ -182,20 +227,35 @@ public class Menu extends JFrame{
 		menuSettings_sound.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				JPanel popup = new JPanel();
-				int startVolume = OptionsManager.getVolume();
-				JSlider chooser = new JSlider(0, 100, startVolume);
-				chooser.addChangeListener(new ChangeListener() {
+				popup.setLayout(new GridLayout(2,2));
+				//Effect
+				int effectVolume = OptionsManager.effectVolume;
+				JSlider effectSlider = new JSlider(0, 100, effectVolume);
+				effectSlider.addChangeListener(new ChangeListener() {
 					public void stateChanged(ChangeEvent e) {
-						OptionsManager.setVolume(chooser.getValue());
+						OptionsManager.setEffectVolume(effectSlider.getValue());
 					}
 				});
-				popup.add(chooser);
+				//Background
+				int backgroundVolume = OptionsManager.backgroundVolume;
+				JSlider backgroundSlider = new JSlider(0, 100, backgroundVolume);
+				backgroundSlider.addChangeListener(new ChangeListener() {
+					public void stateChanged(ChangeEvent e) {
+						OptionsManager.setBackgroundVolume(backgroundSlider.getValue());
+					}
+				});
+				popup.add(new JLabel("Effect volume"));
+				popup.add(effectSlider);
+				popup.add(new JLabel("Background volume"));
+				popup.add(backgroundSlider);
 				int result = JOptionPane.showConfirmDialog(null, popup, "Sound Settings", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 				if(result == JOptionPane.OK_OPTION) {
-					OptionsManager.setVolume(chooser.getValue());
+					OptionsManager.setEffectVolume(effectSlider.getValue());
+					OptionsManager.setBackgroundVolume(backgroundSlider.getValue());
 					OptionsManager.Save();
 				}else {
-					OptionsManager.setVolume(startVolume);
+					OptionsManager.setEffectVolume(effectVolume);
+					OptionsManager.setBackgroundVolume(backgroundVolume);
 				}
 			}
 		});
@@ -212,4 +272,5 @@ public class Menu extends JFrame{
 		
 		menu = new Menu(menuBar);
 	}
+	
 }
